@@ -1,0 +1,47 @@
+---
+# this playbook is called to execute hot (online) backup for EC2 Oracle
+# Author: R Cutler
+# Created: 08.02.2018
+- hosts: all
+  gather_facts: yes
+  vars:
+    user_name: "{{rusername}}"
+    pass_word: "{{rpassword}}"
+    ORACLE_BASE_VAR: "{{roraclebase}}"
+    ORACLE_HOME_VAR: "{{roraclehome}}"
+    ORACLE_SID_VAR: "{{roraclesid}}"
+    DSource_VAR: "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={{ ansible_fqdn }})(PORT=1521)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME={{ ORACLE_SID_VAR }}))) "
+  tasks:
+  - name: Set environment variables - enable backup - copy files - disable backup mode
+    shell: |
+      umask 022
+      setenv NLS_DATE_FORMAT 'YYYY-MM-DD-HH24:MI:SS'
+      setenv ORACLE_BASE {{ ORACLE_BASE_VAR }}
+      setenv ORACLE_HOME {{ ORACLE_HOME_VAR }}
+      setenv ORACLE_SID {{ ORACLE_SID_VAR }}
+      setenv LD_LIBRARY_PATH ${ORACLE_HOME}/lib:${ORACLE_HOME}/jdbc/lib:/usr/lib
+      setenv PATH ${ORACLE_HOME}/bin:${LD_LIBRARY_PATH}:${PATH}
+      sqlplus /nolog << EOF
+      connect {{ user_name }}/{{ pass_word }}@"{{ DSource_VAR }}"
+      !rm -rf <backup_dir_path>/bkupctrl.ctl
+      alter database begin backup;
+      !cp $ORACLE_HOME/dbs/*ora  <backup_dir_path>/dbs/.
+      !cp $ORACLE_HOME/network/admin/*ora  <backup_dir_path>/network/.
+      !cp -fpR <path>/*  <backup_dir_path>/files/.
+      alter database end backup;
+      alter database switch logfile;
+      !cp -fpR <path>/archivelog/*  <backup_dir_path>/archdir/.
+      alter database backup controlfile to '<backup_dir_path/file/bkupctrl.ctrl';
+      !chown -fR <oracle_owner>:<oracle_group> <backup_dir_path>
+      EOF
+    args:
+      executable: /bin/bash
+    register: orahotbkup
+  
+  - debug:
+      msg: "Oracle backup output: {{ orahotbkup.stdout }}"
+    when: orahotbkup.stdout != ""
+
+  - fail:
+      msg: "Error: {{ orahotbkup. stderr }}" 
+    when: orahotbkup.stderr != ""

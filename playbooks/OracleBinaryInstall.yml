@@ -1,0 +1,34 @@
+---
+# this playbook is called to install and patch software then cleanup
+# Author: R Cutler
+# Created: 11.05.2019
+- name: run all scripts against hosts
+  hosts: 127.0.0.1
+  gather_facts: yes
+  tasks:
+  - name: check if file system exists
+    command: file <oracle_base_path>
+    register: checkfilesystem
+    delegate_to: localhost
+
+  - name: call to install binaries
+    import_role:
+      name: oracleInstall
+    register: orainstall
+    delegate_to: localhost
+    when: "'directory' in checkfilesystem.stdout"
+  
+  - name: call to patch binaries only
+    import_role:
+      name: patchbinary
+    register: orapatch
+    delegate_to: localhost
+    failed_when:
+      - "'FAIL' in orapatch.stderr"
+  
+  - name: clean code patch
+    file:
+      path: /tmp/code
+      state: absent
+    register: rmPath
+    delegate_to: localhost

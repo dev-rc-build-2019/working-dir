@@ -1,0 +1,12 @@
+---
+# this playbook is called to deprovision database and software
+# Author: R Cutler
+# Created: 11.05.2019
+- name: call code to deprovision the database environment
+  hosts: 127.0.0.1
+  gather_facts: yes
+  tasks:
+  - import_role: 
+      name: deprovisionOracle
+    register: deprovOracle
+    delegate_to: localhost

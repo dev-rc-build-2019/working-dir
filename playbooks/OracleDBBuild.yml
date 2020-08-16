@@ -1,0 +1,37 @@
+---
+# this playbook is called to execute Oracle build using response file
+# Author: R Cutler
+# Created: 11.05.2019
+- name: accept parameters and build environment
+  hosts: 127.0.0.1
+  gather_facts: yes
+  tasks:
+  - name: check if file system exists
+    command: file <oracle_base_path>
+    register: checkfilesystem
+    delegate_to: localhost
+
+  - name: call to build database using dbca utility
+    import_role:
+      name: oradbBuild
+    vars:
+      appname: "{{iappname|guote}}"
+      charset: "{{icharset|guote}}"
+      entid: "{{intid|guote}}"
+      enotify: "{{inotify|guote}}"
+    register: oraDB
+    delegate_to: localhost
+    when: "'directory' in checkfilesystem.stdout"
+
+  - name: call to patch databse only
+    import_role:
+      name: patchdb
+    register: patchDB
+    delegate_to: localhost
+    failed_when:
+      - "'FAIL' in patchDB.stderr"
+  
+  - name: clean code path
+    command: /tmp/code/cleanup.sh
+    register: rmPath
+    delegate_to: localhost

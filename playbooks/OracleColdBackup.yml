@@ -1,0 +1,45 @@
+---
+# this playbook is called to execute hot (offline) backup for EC2 Oracle
+# Author: R Cutler
+# Created: 08.02.2018
+### TESTING ****
+- hosts: all
+  gather_facts: yes
+  vars:
+    user_name: "{{rusername}}"
+    pass_word: "{{rpassword}}"
+    ORACLE_BASE_VAR: "{{roraclebase}}"
+    ORACLE_HOME_VAR: "{{roraclehome}}"
+    ORACLE_SID_VAR: "{{roraclesid}}"
+    DSource_VAR: "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={{ ansible_fqdn }})(PORT=1521)(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME={{ ORACLE_SID_VAR }}))) "
+  tasks:
+  - name: Set environment variables - shutdown db - copy files - start db
+    shell: |
+      umask 022
+      setenv NLS_DATE_FORMAT 'YYYY-MM-DD-HH24:MI:SS'
+      setenv ORACLE_BASE {{ ORACLE_BASE_VAR }}
+      setenv ORACLE_HOME {{ ORACLE_HOME_VAR }}
+      setenv ORACLE_SID {{ ORACLE_SID_VAR }}
+      setenv LD_LIBRARY_PATH ${ORACLE_HOME}/lib:${ORACLE_HOME}/jdbc/lib:/usr/lib
+      setenv PATH ${ORACLE_HOME}/bin:${LD_LIBRARY_PATH}:${PATH}
+      sqlplus /nolog << EOF
+      connect /as sysdba
+      shutdown immediate;
+      !cp $ORACLE_HOME/dbs/*ora  <backup_dir_path>/dbs/.
+      !cp $ORACLE_HOME/network/admin/*ora  <backup_dir_path>/network/.
+      !cp -fpR <path>/*  <backup_dir_path>/files/.
+      !cp -fpR <path>/archivelog/*  <backup_dir_path>/archdir/.
+      startup;
+      !chown -fR <oracle_owner>:<oracle_group> <backup_dir_path>
+      EOF
+    args:
+      executable: /bin/bash
+    register: oracoldbkup
+  
+  - debug:
+      msg: "Oracle backup output: {{ oracoldbkup.stdout }}"
+    when: oracoldbkup.stdout != ""
+
+  - fail:
+      msg: "Error: {{ oracoldbkup. stderr }}" 
+    when: oracoldbkup.stderr != ""

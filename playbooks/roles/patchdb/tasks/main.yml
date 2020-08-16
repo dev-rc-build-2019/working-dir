@@ -1,0 +1,24 @@
+---
+- name: copy file to localhost
+  copy:
+    src: "{{ role_path }}/files/"
+    dest: "{{ oracle_code_loc }}"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+    mode: '0755'
+  register: fileCopydb
+
+- name: run patch script
+  shell: |
+    "{{ oracle_code_loc }}/{{ patch_file }} {{ dbnotify|quote }}"
+    if [ $? = 0 ]; then
+      echo "STATUS: SUCCESS\n"
+    else
+      echo "STATUS: FAILURE\n"
+      echo "ERRORMESSAGE: database not patched - check logs"
+    fi
+  become: yes
+  become_user: "{{ oracle_user }}"
+  register: patchDB
+  failed_when:
+    - "'FAIL' in patchDB.stderr"
