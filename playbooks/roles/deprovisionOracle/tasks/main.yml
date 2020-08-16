@@ -1,0 +1,83 @@
+---
+- name: copy template
+  template:
+    src: "{{ role_path }}/templates/deinstall_copy.rsp.j2"
+    dest: /tmp/deinstall_temp.rsp
+    mode: '0640'
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  become: yes
+  become_user: "{{ oracle_user }}"
+  register: copyInsRspFile
+
+- name: deinstall Oracle database and binaries files
+  shell: |
+    oratabf=/etc/oratab
+    orasid=`grep -E "19.0" ${oratabf} |head -1 |awk -F ":" '{print $1}'`
+    orahome=`grep -E "19.0" ${oratabf} |head -1 |awk -F ":" '{print $2}'`
+    lsnr=`grep ^LISTENER $ORACLE_HOME/network/admin/listener.ora 2>/dev/null | head -24 |awk -F ":" '{print $1}'`
+    deins_temp="/tmp/deinstall_temp.rsp"
+    sidu=`echo ${orasid} | tr [:lower:] [:upper:]`
+    sidl=`echo ${orasid} | tr [:upper:] [:lower:]`
+    hostname=`hostname`
+    export filename="/tmp/deinstall.out"
+    #####################################
+    # Module to deprovision environment
+    #####################################
+    deinstall_db ()
+    {
+    #####################################
+    # Modify template file
+    #####################################
+    /bin/sed -i "s/<host>/${hostname}/g" ${deins_temp}
+    /bin/sed -i "s/<sidl>/${sidl}/g" ${deins_temp}
+    /bin/sed -i "s/<sidu>/${sidu}/g" ${deins_temp}
+    /bin/sed -i "s/<lsnr>/${lsnr}/g" ${deins_temp}
+    #####################################
+    # Turn off direct NFS
+    #####################################
+    cd ${orahome}/deinstall/deinstall -silent -paramfile ${deins_temp} > ${filename}
+    if [ "$?"" = "0" ]; then
+      echo "STATUS: SUCCESS\n"
+      rm -rf "{{ auditloc }}/*"
+      rm -rf "{{ dataloc1 }}/*"
+      rm -rf "{{ dataloc2 }}/*"
+      rm -rf "{{ dataloc3 }}/*"
+      rm -rf "{{ oracle_base }}/*"
+      rm -rf "{{ dumploc }}/*"
+      rm -rf ${deins_temp}
+      rm -rf "{{ tmplogdir }}"
+      rm -rf "{{ tmpclnuplst }}"
+      crontab -r
+    else
+      echo "STATUS: FAILURE\n"
+      echo "ERRORMESSAGE:Failed on deinstalling - deinstall.sh\n"
+      mailx -s "DEINSTALL failed on $hostname - deinstall.sh" {{ dbnotify }} < ${filename}
+    fi
+    }
+    #####################################
+    # call the module for execution
+    #####################################
+    deinstall_db    
+  become: yes
+  become_user: "{{ oracle_user }}"
+  register: deinstall_oracle
+  failed_when:
+    - "'FAIL' in deinstall_oracle.stderr"
+
+- name:  deinstall Oracle directories owned by root
+  shell: |
+    rm -rf /etc/oratab
+    rm -rf /etc/oraInst.loc
+    rm -rf /opt/ORCLfmap
+    rm -rf "{{ oracle_base }}/*"
+    rm -rf "{{ auditloc }}/*"
+    rm -rf "{{ dataloc1 }}/*"
+    rm -rf "{{ dataloc2 }}/*"
+    rm -rf "{{ dataloc3 }}/*"
+    rm -rf "{{ dumploc }}/*"
+  become: yes
+  become_user: root
+  register: deinstall_orasys
+  failed_when:
+    - "'FAIL' in deinstall_orasys.stderr"

@@ -1,0 +1,37 @@
+---
+- name: create directory
+  file: 
+    dest: "{{ item }}"
+    mode: 0755
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+    state: directory
+  with_items:
+    - "{{ oracle_code_loc }}"
+  become: yes
+  become_user: "{{ oracle_user }}"
+  register: crDirIns
+
+- name: copy file to localhost
+  copy:
+    src: "{{ role_path }}/files/"
+    dest: "{{ oracle_code_loc }}"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+    mode: '0755'
+  register: fileCopy
+
+- name: run patch script
+  shell: |
+    "{{ oracle_code_loc }}/{{ patch_file }} {{ dbnotify|quote }}"
+    if [ $? = 0 ]; then
+      echo "STATUS: SUCCESS\n"
+    else
+      echo "STATUS: FAILURE\n"
+      echo "ERRORMESSAGE: database binaries not patched - check logs"
+    fi
+  become: yes
+  become_user: "{{ oracle_user }}"
+  register: patchBinary
+  failed_when:
+    - "'FAIL' in patchBinary.stderr"

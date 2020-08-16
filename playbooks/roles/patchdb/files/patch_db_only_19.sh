@@ -27,7 +27,7 @@ export DBA_MAIL=${notifylist}
 # send an email patching process is beginning
 #########################
 echo "patching of database $HOSTNAME began at `date`" > /tmp/start_time.txt
-mailx -S "Patching database only $HOSTNAME has begun " oracle@$HOSTNAME $DBA_MAIL < /tmp/start_time.txt
+mailx -s "Patching database only $HOSTNAME has begun " oracle@$HOSTNAME $DBA_MAIL < /tmp/start_time.txt
 chmod 777 /tmp/start_time.txt
 #########################
 # stop listener(s)

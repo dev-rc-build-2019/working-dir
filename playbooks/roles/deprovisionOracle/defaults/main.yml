@@ -1,0 +1,26 @@
+---
+master_node: true
+# oracle user and version
+oracle_user: <oracle_account>
+oracle_group: dcs.install
+oracle_dba_group: dcs.dba
+oracle_version: 19.0.0
+#  oracle environment
+oracle_base: "<path>"
+oracle_home: "{{ oracle_base }}/product/{{ oracle_version }}/dbhome_1"
+tns_admin: "{{ oracle_home }}/network/admin"
+oracle_user_home: "<path>/{{ oracle_user }}"
+oracle_code_loc: "/tmp/code"
+oracle_hostname: "{{ ansible_fqdn }}"
+tmplogdir: "/tmp/logs"
+tmpclnuplst: "/tmp/orabase_cleanup.lst"
+# oratab
+oratab: "/etc/oratab"
+# data file locations
+dataloc1: "/data/oracle01"
+dataloc2: "/data/oracle02"
+dataloc3: "/data/oracle03"
+auditloc: "/data/audit01"
+dumploc: "/data/dump01"
+# notification
+dbnotify: "<email>"

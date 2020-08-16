@@ -1,0 +1,6 @@
+---
+env:
+  ORACLE_HOME: "{{ oracle_home }}"
+  ORACLE_BASE: "{{ oracle_base }}"
+  TNS_ADMIN: "{{ tns_admin }}"
+  PATH: "{{ oracle_home }}/bin:{{ oracle_home }}/OPatch:{{ oracle_home }}//dbs:/bin:/usr/bin:/usr/ccs/bin:/usr/local/bin:/usr/local/sbin:/sbin:."
