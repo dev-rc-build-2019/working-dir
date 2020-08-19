@@ -1,0 +1,9 @@
+# for oracle
+setenv NLS_DATE_FORMAT 'YYYY-MM-DD-HH24:MI:SS'
+#setenv NLS_LANG American_America.WE8MSWIN1252
+setenv ORAENV_ASK NO
+setenv ORACLE_BASE /app/oracle
+setenv ORACLE_HOME /app/oracle/product/19.0.0/dbhome_1
+setenv LD_LIBRARY_PATH $ORACLE_HOME/lib:$ORACLE_HOME/jdbc/lib:/usr/lib
+setenv PATH $ORACLE_HOME/bin:$ORACLE_HOME/dbs:$ORACLE_HOME/OPatch:/usr/local/bin:/usr/local/sbin:/app/share/bin:/app/share/sbin:/usr/bin/X11:/bin:/usr/bin:/sbin:/usr/sbin:/usr/ccs/bin:.
+setenv TNS_ADMIN /app/oracle/product/19.0.0/dbhome_1/network/admin

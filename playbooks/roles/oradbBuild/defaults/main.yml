@@ -1,0 +1,26 @@
+---
+master_node: true
+# oracle user and version
+oracle_user: <oracle_account>
+oracle_group: <oracle_group>
+oracle_version: 19.0.0
+#  oracle environment
+oracle_dba_group: <db_group>
+oracle_base: "<path>"
+oracle_home: "{{ oracle_base }}/product/{{ oracle_version }}/dbhome_1"
+oracle_inventory_loc: "{{ oracle_base }}/oraInventory"
+oracle_code_loc: "/tmp/code"
+oracle_user_home: "<path>/{{ oracle_user }}"
+oracle_hostname: "{{ ansible_fqdn }}"
+tns_admin: "{{ oracle_home }}/network/admin"
+stage_loc: "<path>/scripts"
+sw_basedir: "<local>/vendor/oracle/DB"
+# oratab
+oratab: "/etc/oratab"
+# files
+orabin_file: db_home.zip
+db_sftw_rsp: db_software.rsp
+orabuild_file: dbca_build_19.sh
+patch_file: patch_db_only_19.sh
+# notification
+dbnotify: "<email>"

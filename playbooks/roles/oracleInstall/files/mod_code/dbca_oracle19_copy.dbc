@@ -1,0 +1,94 @@
+<?xml version = '1.0'?>
+<DatabaseTemplate name="dbca_oracle19" description="" version="19.0.0.0.0">
+   <CommonAttributes>
+      <option name="OMS" value="false" includeInPDBs="false"/>
+      <option name="JSERVER" value="false" includeInPDBs="false"/>
+      <option name="SPATIAL" value="false" includeInPDBs="false"/>
+      <option name="IMEDIA" value="false" includeInPDBs="false"/>
+      <option name="ORACLE_TEXT" value="false" includeInPDBs="false">
+         <tablespace id="SYSAUX"/>
+      </option>
+      <option name="SAMPLE_SCHEMA" value="false" includeInPDBs="false"/>
+      <option name="CWMLITE" value="false" includeInPDBs="false">
+         <tablespace id="SYSAUX"/>
+      </option>
+      <option name="APEX" value="false" includeInPDBs="false"/>
+      <option name="DV" value="false" includeInPDBs="false"/>
+   </CommonAttributes>
+   <Variables/>
+   <CustomScripts Execute="false"/>
+   <InitParamAttributes>
+      <InitParams>
+         <initParam name="db_name" value="<orasid>"/>
+         <initParam name="db_domain" value="us.lmco.com"/>
+         <initParam name="db_block_size" value="8192"/>
+         <initParam name="audit_file_dest" value="/data/audit01/<orasid>"/>
+         <initParam name="audit_trail" value="os"/>
+         <initParam name="compatible" value="19.0.0"/>
+         <initParam name="diagnostic_dest" value="/app/oracle"/>
+         <initParam name="dispatchers" value="(PROTOCOL=TCP) (SERVICE=<orasid>XDB)"/>
+         <initParam name="filesystemio_options" value="setall"/>
+         <initParam name="local_listener" value="listener_<orasid>"/>
+         <initParam name="log_archive_dest_1" value="'LOCATION=/data/oracle03/<orasid>/archivelog'"/>
+         <initParam name="log_archive_format" value="arch_%t_%s_%r.arc"/>
+         <initParam name="nls_language" value="AMERICAN"/>
+         <initParam name="nls_territory" value="AMERICA"/>
+         <initParam name="open_cursors" value="300"/>
+         <initParam name="os_authent_prefix" value="lmdc$"/>
+         <initParam name="pga_aggregate_target" value="780" unit="MB"/>
+         <initParam name="processes" value="320"/>
+         <initParam name="remote_login_passwordfile" value="EXCLUSIVE"/>
+         <initParam name="sga_target" value="<sgasize>" unit="MB"/>
+         <initParam name="sec_max_failed_login_attempts" value="5"/>
+         <initParam name="undo_tablespace" value="UNDOTBS1"/>
+      </InitParams>
+      <MiscParams>
+         <databaseType>MULTIPURPOSE</databaseType>
+         <maxUserConn>20</maxUserConn>
+         <customSGA>false</customSGA>
+         <dataVaultEnabled>false</dataVaultEnabled>
+         <characterSet><charset></characterSet>
+         <nationalCharacterSet>AL16UTF16</nationalCharacterSet>
+         <archiveLogMode>true</archiveLogMode>
+         <initParamFileName>{ORACLE_BASE}/admin/{DB_UNIQUE_NAME}/pfile/init{SID}.ora</initParamFileName>
+      </MiscParams>
+      <SPfile useSPFile="true">{ORACLE_BASE}/admin/{DB_UNIQUE_NAME}/pfile/spfile{SID}.ora</SPfile>
+   </InitParamAttributes>
+   <StorageAttributes>
+      <DataFiles>
+         <Location>{ORACLE_HOME}/assistants/dbca/templates/Seed_Database.dfb</Location>
+         <SourceDBName cdb="true">seeddata</SourceDBName>
+         <Name id="3" Tablespace="SYSAUX" Contents="PERMANENT" Size="2048" autoextend="true" blocksize="8192" con_id="1">/data/oracle01/<orasid>/system/sysaux01.dbf</Name>
+         <Name id="1" Tablespace="SYSTEM" Contents="PERMANENT" Size="2048" autoextend="true" blocksize="8192" con_id="1">/data/oracle01/<orasid>/system/system01.dbf</Name>
+         <Name id="4" Tablespace="UNDOTBS1" Contents="UNDO" Size="512" autoextend="true" blocksize="8192" con_id="1">/data/oracle02/<orasid>/undo/undotbs01.dbf</Name>
+         <Name id="7" Tablespace="USERS" Contents="PERMANENT" Size="10" autoextend="true" blocksize="8192" con_id="1">/data/oracle02/<orasid>/users/users01.dbf</Name>
+      </DataFiles>
+      <TempFiles>
+         <Name id="1" Tablespace="TEMP" Contents="TEMPORARY" Size="1024" con_id="1">/data/oracle02/<orasid>/temp/temp01.dbf</Name>
+      </TempFiles>
+      <ControlfileAttributes id="Controlfile">
+         <maxDatafiles>1024</maxDatafiles>
+         <maxLogfiles>16</maxLogfiles>
+         <maxLogMembers>3</maxLogMembers>
+         <maxLogHistory>1</maxLogHistory>
+         <maxInstances>8</maxInstances>
+         <image name="control01.ctl" filepath="/data/oracle02/<orasid>/ctl/"/>
+         <image name="control02.ctl" filepath="/data/oracle03/<orasid>/ctl/"/>
+         <image name="control03.ctl" filepath="/data/oracle01/<orasid>/ctl/"/>
+      </ControlfileAttributes>
+      <RedoLogGroupAttributes id="1">
+         <reuse>false</reuse>
+         <fileSize unit="KB">102400</fileSize>
+         <Thread>1</Thread>
+         <member ordinal="0" memberName="redo01a.rdo" filepath="/data/oracle03/<orasid>/redo/"/>
+         <member ordinal="0" memberName="redo01b.rdo" filepath="/data/oracle02/<orasid>/redo/"/>
+      </RedoLogGroupAttributes>
+      <RedoLogGroupAttributes id="2">
+         <reuse>false</reuse>
+         <fileSize unit="KB">102400</fileSize>
+         <Thread>1</Thread>
+         <member ordinal="0" memberName="redo02b.rdo" filepath="/data/oracle03/<orasid>/redo/"/>
+         <member ordinal="0" memberName="redo02a.rdo" filepath="/data/oracle02/<orasid>/redo/"/>
+      </RedoLogGroupAttributes>
+   </StorageAttributes>
+</DatabaseTemplate>

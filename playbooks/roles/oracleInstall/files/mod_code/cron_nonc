@@ -1,0 +1,23 @@
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# CRONTAB
+#
+# FORMAT: MM HH DM MO DW CM
+#  WHERE: MM = minute       (00-59),
+#         HH = hour         (00-23),
+#         DM = day of month (01-31),
+#         MO = month        (01-12),
+#         DW = day of week  (0-6, 0 = Sunday)
+#         CM = command
+#
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# DATE       NAME            DESCRIPTION
+# ---------- --------------- -------------------------------------------------------------------
+# 12.06.2018 rcutler         Rewrite for automation                            
+#
+#  Clean listener, alert and audit directories
+01 00 * * * /app/oradba/cronjobs/clean_logfiles.sh /app/oracle > /app/oradba/LOG/cron/clean_logfiles-`hostname`.out 2>&1
+#
+31 00 * * * /app/oradba/cronjobs/adr_cleanup.sh oracle_sid /app/oracle ha_flag > /dev/null 2>&1
+#
+# Place holder for permissions
+05 00 * * * /app/oradba/cronjobs/revoke_diag_access.sh > /dev/null 2>&1
